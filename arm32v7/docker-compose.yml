@@ -47,7 +47,7 @@ services:
       - OBSERVIUM_DB_NAME=observium
       - OBSERVIUM_DB_USER=observium
       - OBSERVIUM_DB_PASS=passw0rd
-      - OBSERVIUM_BASE_URL=http://yourservername:8888
+      - OBSERVIUM_BASE_URL=http://observiumap:8888
       - TZ=Asia/Bangkok
     volumes:
       - observium_logs:/opt/observium/logs

@@ -47,7 +47,8 @@ services:
       - OBSERVIUM_DB_NAME=observium
       - OBSERVIUM_DB_USER=observium
       - OBSERVIUM_DB_PASS=passw0rd
-      - OBSERVIUM_BASE_URL=http://observiumap:8888
+      # In a Swarm environment, use either the public-facing hostname/IP or Swarm service mesh DNS
+      - OBSERVIUM_BASE_URL=${OBSERVIUM_BASE_URL:-http://localhost:8888}
       - TZ=Asia/Bangkok
     volumes:
       - observium_logs:/opt/observium/logs
@@ -55,7 +56,10 @@ services:
     networks:
       - observium_network
     ports:
-      - "8888:80"
+      - target: 80
+        published: 8888
+        mode: ingress
+        protocol: tcp
     depends_on:
       - observiumdb
     deploy:
@@ -69,6 +73,10 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.observium-arm.rule=Host(`observium.example.com`)"
+        - "traefik.http.services.observium-arm.loadbalancer.server.port=80"
 
 networks:
   observium_network:

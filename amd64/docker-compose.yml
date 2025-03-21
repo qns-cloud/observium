@@ -1,5 +1,8 @@
-# Example Docker Compose file for Observium
+# Example Docker Compose file for Observium on Docker Swarm (AMD64)
 # Maintained by somsakc@hotmail.com
+# Updated for Docker Swarm with Portainer and persistent volumes
+
+version: '3.8'
 
 services:
   db:
@@ -11,16 +14,26 @@ services:
       - MYSQL_DATABASE=observium
       - TZ=Asia/Bangkok
     volumes:
-      - ./data:/var/lib/mysql
+      - observium_data:/var/lib/mysql
     networks:
-      - back-tier
-    restart: unless-stopped
+      - observium_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.platform.arch == x86_64
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   app:
     # Launch published image.
-    image: tmp:latest # mbixtech/observium:latest
-
-    # Or build image:
+    image: mbixtech/observium:latest # or specific version tag
+    
+    # Or build image - uncomment if needed:
     # build:
     #   args:
     #     # Build specific version or "latest".
@@ -37,16 +50,35 @@ services:
       - OBSERVIUM_BASE_URL=http://yourservername:8888
       - TZ=Asia/Bangkok
     volumes:
-      - ./logs:/opt/observium/logs
-      - ./rrd:/opt/observium/rrd
+      - observium_logs:/opt/observium/logs
+      - observium_rrd:/opt/observium/rrd
     networks:
-      - back-tier
+      - observium_network
     ports:
       - "8888:80"
-    restart: unless-stopped
     depends_on:
       - db
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.platform.arch == x86_64
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
 networks:
-  back-tier:
-    driver: bridge
+  observium_network:
+    driver: overlay
+    attachable: true
+
+volumes:
+  observium_data:
+    driver: local
+  observium_logs:
+    driver: local
+  observium_rrd:
+    driver: local

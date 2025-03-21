@@ -14,7 +14,7 @@ services:
       - MYSQL_DATABASE=observium
       - TZ=Asia/Bangkok
     volumes:
-      - observium_arm_data:/var/lib/mysql
+      - observium_data:/var/lib/mysql
     networks:
       - observium_network
     deploy:
@@ -50,8 +50,8 @@ services:
       - OBSERVIUM_BASE_URL=http://yourservername:8888
       - TZ=Asia/Bangkok
     volumes:
-      - observium_arm_logs:/opt/observium/logs
-      - observium_arm_rrd:/opt/observium/rrd
+      - observium_logs:/opt/observium/logs
+      - observium_rrd:/opt/observium/rrd
     networks:
       - observium_network
     ports:
@@ -76,9 +76,9 @@ networks:
     attachable: true
 
 volumes:
-  observium_arm_data:
+  observium_data:
     driver: local
-  observium_arm_logs:
+  observium_logs:
     driver: local
-  observium_arm_rrd:
+  observium_rrd:
     driver: local

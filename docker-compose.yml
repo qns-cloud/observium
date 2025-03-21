@@ -6,7 +6,7 @@ version: '3.8'
 
 services:
   db:
-    image: mariadb:11.7
+    image: ${MARIADB_IMAGE:-mariadb:11.7}
     environment:
       - MYSQL_ROOT_PASSWORD=passw0rd
       - MYSQL_USER=observium
@@ -20,9 +20,6 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-      placement:
-        constraints:
-          - node.platform.arch == x86_64
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -30,7 +27,7 @@ services:
         window: 120s
 
   app:
-    image: mbixtech/observium:24.12
+    image: ${OBSERVIUM_IMAGE:-mbixtech/observium:24.12}
     environment:
       - OBSERVIUM_ADMIN_USER=admin
       - OBSERVIUM_ADMIN_PASS=passw0rd
@@ -52,65 +49,6 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-      placement:
-        constraints:
-          - node.platform.arch == x86_64
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-
-  arm_db:
-    image: jsurf/rpi-mariadb:latest
-    environment:
-      - MYSQL_ROOT_PASSWORD=passw0rd
-      - MYSQL_USER=observium
-      - MYSQL_PASSWORD=passw0rd
-      - MYSQL_DATABASE=observium
-      - TZ=Asia/Bangkok
-    volumes:
-      - observium_arm_data:/var/lib/mysql
-    networks:
-      - observium_network
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.platform.arch == arm
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-
-  arm_app:
-    image: mbixtech/arm32v7-observium:latest
-    environment:
-      - OBSERVIUM_ADMIN_USER=admin
-      - OBSERVIUM_ADMIN_PASS=passw0rd
-      - OBSERVIUM_DB_HOST=arm_db
-      - OBSERVIUM_DB_NAME=observium
-      - OBSERVIUM_DB_USER=observium
-      - OBSERVIUM_DB_PASS=passw0rd
-      - OBSERVIUM_BASE_URL=http://observium.mbixtech.com:8888
-      - TZ=Asia/Bangkok
-    volumes:
-      - observium_arm_logs:/opt/observium/logs
-      - observium_arm_rrd:/opt/observium/rrd
-    networks:
-      - observium_network
-    ports:
-      - "8888:80"
-    depends_on:
-      - arm_db
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.platform.arch == arm
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -128,10 +66,4 @@ volumes:
   observium_logs:
     driver: local
   observium_rrd:
-    driver: local
-  observium_arm_data:
-    driver: local
-  observium_arm_logs:
-    driver: local
-  observium_arm_rrd:
     driver: local

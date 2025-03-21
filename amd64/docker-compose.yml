@@ -31,7 +31,7 @@ services:
 
   app:
     # Launch published image.
-    image: mbixtech/observium:latest # or specific version tag
+    image: mbixtech/observium:latest
     
     # Or build image - uncomment if needed:
     # build:
